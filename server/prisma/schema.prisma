@@ -1,0 +1,67 @@
+// Codex de Jutsus – esquema do banco (ver DER, seção 2.5)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./codex.db"
+}
+
+// slot: FONTE | TIPO | ELEMENTO | SIMBOLICO
+model Selo {
+  id          Int             @id @default(autoincrement())
+  tecla       String // W, A, S ou D
+  slot        String
+  significado String
+  descricao   String?
+  sequencias  SequenciaSelo[]
+
+  @@unique([tecla, slot]) // RN04
+}
+
+// raridade: COMUM | RARO | LENDARIO
+model Jutsu {
+  id               Int               @id @default(autoincrement())
+  nome             String            @unique
+  descricao        String?
+  raridade         String            @default("COMUM")
+  gestoFinalizacao String?
+  efeitoSegurar    String?
+  assinatura       String?           @unique // RN03, ex.: W-D-D-W
+  criadoEm         DateTime          @default(now())
+  sequencia        SequenciaSelo[]
+  personagens      PersonagemJutsu[]
+}
+
+model SequenciaSelo {
+  id      Int   @id @default(autoincrement())
+  jutsuId Int
+  seloId  Int
+  posicao Int
+  jutsu   Jutsu @relation(fields: [jutsuId], references: [id], onDelete: Cascade)
+  selo    Selo  @relation(fields: [seloId], references: [id], onDelete: Restrict) // RN05
+
+  @@unique([jutsuId, posicao])
+}
+
+// alinhamento: PURO | MALIGNO | INDECISO
+model Personagem {
+  id          Int               @id @default(autoincrement())
+  nome        String
+  alinhamento String            @default("INDECISO")
+  vila        String?
+  desertor    Boolean           @default(false)
+  jutsus      PersonagemJutsu[]
+}
+
+model PersonagemJutsu {
+  personagemId Int
+  jutsuId      Int
+  dominio      Int // RN06: 1 a 5
+  personagem   Personagem @relation(fields: [personagemId], references: [id], onDelete: Cascade)
+  jutsu        Jutsu      @relation(fields: [jutsuId], references: [id], onDelete: Cascade)
+
+  @@id([personagemId, jutsuId])
+}

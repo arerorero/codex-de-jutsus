@@ -1,0 +1,21 @@
+{
+  "name": "codex-de-jutsus",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Codex de Jutsus – Sistema de Gerenciamento de Jutsus para O Projeto",
+  "author": "Filippo Bruschi Grassano",
+  "workspaces": [
+    "server",
+    "client"
+  ],
+  "scripts": {
+    "postinstall": "npm run db:setup -w server",
+    "dev": "concurrently -n api,web -c yellow,cyan \"npm run dev -w server\" \"npm run dev -w client\"",
+    "build": "npm run build -w client",
+    "test": "npm test -w server",
+    "db:reset": "npm run db:reset -w server"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  }
+}
